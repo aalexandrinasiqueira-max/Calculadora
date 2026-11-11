@@ -1,0 +1,60 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="calculadora">
+        <h1>Calculadora</h1>
+        <p class="descricao">
+            Seja bem-vindo(a)! Para começar, digite dois números
+            nos campos indicados, escolha a operação matemática
+            que deseja realizar e clique no botão "Calcular".
+            O resultado aparecerá automaticamente no campo abaixo.
+            É simples e rápido!
+        </p>
+
+        <label for="numero1">Primeiro número:</label>
+        <input
+            type="number"
+            id="numero1"
+            placeholder="Digite o primeiro número"
+        >
+
+        <label for="numero2">Segundo número:</label>
+        <input
+            type="number"
+            id="numero2"
+            placeholder="Digite o segundo número"
+        >
+
+        <label for="operacao">Escolha a operação:</label>
+
+        <select id="operacao">
+            <option value="" disabled selected>Selecione uma opção</option>
+            <option value="soma">Soma (+)</option>
+            <option value="subtracao">Subtração (-)</option>
+            <option value="multiplicacao">Multiplicação (*)</option>
+            <option value="divisao">Divisão (÷)</option>
+            <option value="potencia">Potência (x^y)</option>
+            <option value="raiz">Raiz quadrada (√x)</option>
+        </select>
+
+        <button onclick="calcular()">Calcular</button>
+
+        <label for="resultado">Resultado:</label>
+
+        <input
+            type="text"
+            id="resultado"
+            readonly
+            placeholder="O resultado aparecerá aqui"
+        >
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
