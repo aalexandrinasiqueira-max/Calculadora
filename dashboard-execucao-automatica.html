@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Execução Automática — Testes da Calculadora</title>
+<style>
+:root{--bg:#101014;--panel:#1b1b22;--line:#34343e;--red:#dc2626;--text:#f4f4f5;--muted:#a1a1aa;--green:#22c55e;--amber:#f59e0b}
+*{box-sizing:border-box}body{margin:0;padding:28px 16px;background:radial-gradient(circle at top right,#451313 0,transparent 36%),linear-gradient(135deg,#0f0f11,#1e1e24,#260d0d);font-family:Segoe UI,Arial,sans-serif;color:var(--text)}main{max-width:1180px;margin:auto}
+header{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:20px}.eyebrow{font-size:12px;color:#f87171;letter-spacing:2px;text-transform:uppercase;font-weight:700}h1{font-size:clamp(25px,4vw,37px);margin:7px 0}.muted{color:var(--muted);line-height:1.55}
+button{border:0;border-radius:10px;background:var(--red);color:#fff;padding:13px 18px;font-weight:700;font-size:14px;cursor:pointer}button:hover{background:#b91c1c}button:disabled{opacity:.5;cursor:wait}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0}.stat,.panel{background:#1b1b22f2;border:1px solid var(--line);border-radius:15px;box-shadow:0 10px 28px #0003}.stat{padding:16px}.stat span{font-size:12px;color:var(--muted)}.stat b{display:block;font-size:27px;margin-top:6px}.panel{padding:19px;margin:15px 0}.panel h2{font-size:18px;margin:0 0 14px}.progressline{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin-bottom:8px}.track{height:9px;background:#383840;border-radius:99px;overflow:hidden}.bar{height:100%;width:0;background:linear-gradient(90deg,#b91c1c,#ef4444);transition:width .2s}
+.layout{display:grid;grid-template-columns:1.1fr .9fr;gap:15px}.stepbox{min-height:150px;background:#121218;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:15px}.step-id{color:#f87171;font-size:12px;font-weight:800;letter-spacing:1px}.step-title{font-size:18px;font-weight:700;margin:6px 0}.step-desc{color:#d4d4d8;line-height:1.45;font-size:13px}.live{display:grid;gap:6px;margin-top:10px}.live div{display:flex;justify-content:space-between;gap:10px;padding:7px 10px;background:#202027;border-radius:8px;font-size:12px}.live span:first-child{color:var(--muted)}.live b{font-weight:600;text-align:right;overflow-wrap:anywhere}
+.log{max-height:740px;overflow:auto;display:grid;gap:8px}.logitem{padding:10px;border-radius:9px;background:#121218;border:1px solid var(--line);font-size:12px}.logitem strong{display:block;margin-bottom:3px}.logitem small{color:var(--muted);line-height:1.4}.pill{font-size:10px;padding:3px 6px;border-radius:99px;font-weight:800;float:right}.ok{color:#86efac;background:#14532d77}.bad{color:#fca5a5;background:#7f1d1d77}.warn{color:#fcd34d;background:#78350f77}.pending{color:#d4d4d8;background:#3f3f4677}
+table{border-collapse:collapse;width:100%;min-width:660px}th,td{text-align:left;padding:11px 8px;border-bottom:1px solid var(--line);font-size:12px;vertical-align:top}th{color:var(--muted);text-transform:uppercase;font-size:10px;letter-spacing:.6px}.tablewrap{overflow-x:auto}
+.note{font-size:12px;color:var(--muted);line-height:1.6}.actions{display:flex;gap:9px;flex-wrap:wrap}.secondary{background:#34343e}.secondary:hover{background:#454550}
+
+/* Altura exata da calculadora para eliminar espaço vago */
+.iframe-container{width:100%;height:580px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#121218}
+iframe{width:100%;height:100%;border:0;overflow:hidden}
+
+footer{text-align:center;color:#71717a;font-size:11px;margin:22px}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.panel{padding:14px}.iframe-container{height:580px}}
+</style></head>
+<body><main>
+<header><div><div class="eyebrow">QA • Simulação de usuário</div><h1>Execução automática dos testes</h1><p class="muted">Acompanhe a calculadora sendo preenchida, operada e validada etapa por etapa.</p></div><div class="actions"><button id="start" onclick="startRun()">▶ Iniciar teste completo</button><button class="secondary" id="stop" onclick="stopRun()" disabled>Parar</button></div></header>
+<section class="stats">
+<div class="stat"><span>Casos concluídos</span><b id="total">0 / 14</b></div><div class="stat"><span>Aprovados</span><b id="passed" style="color:#4ade80">0</b></div><div class="stat"><span>Reprovados</span><b id="failed" style="color:#f87171">0</b></div><div class="stat"><span>Aproveitamento</span><b id="rate">—</b></div>
+</section>
+<section class="panel"><div class="progressline"><span id="progressLabel">Aguardando início</span><span id="percent">0%</span></div><div class="track"><div class="bar" id="bar"></div></div></section>
+<div class="layout">
+<section class="panel">
+  <h2>Etapa em execução</h2>
+  <div class="stepbox">
+    <div class="step-id" id="stepId">PRONTO PARA COMEÇAR</div>
+    <div class="step-title" id="stepTitle">Aguardando início</div>
+    <div class="step-desc" id="stepDesc">Clique em “Iniciar teste completo”. O sistema vai executar os casos selecionados no plano, mostrar as ações e registrar o resultado de cada validação.</div>
+    <div class="live" id="live"></div>
+  </div>
+  
+  <h2>Calculadora em teste</h2>
+  <div class="iframe-container" id="iframeBox">
+    <iframe id="calcFrame" title="Calculadora em teste" scrolling="no"></iframe>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>Histórico passo a passo</h2>
+  <div class="log" id="log">
+    <div class="logitem"><strong>Nenhuma ação executada</strong><small>O histórico aparecerá aqui, em ordem, enquanto o teste automático acontece.</small></div>
+  </div>
+</section>
+</div>
+
+<section class="panel"><h2>Relatório final dos casos de teste</h2><div class="tablewrap"><table><thead><tr><th>ID</th><th>Cenário</th><th>Esperado</th><th>Obtido</th><th>Status</th></tr></thead><tbody id="report"><tr><td colspan="5" class="note">Aguardando execução.</td></tr></tbody></table></div><p class="note" id="finalNote">O CT03.4 foi excluído conforme solicitado. A execução cobre CT01, CT02, CT03.1–3.3 e CT04 UI.1–UI.3.</p></section>
+<section class="panel"><h2>Configuração</h2><label class="note" for="path">Caminho do HTML da calculadora (mesma pasta do dashboard)</label><input id="path" value="index.html" style="display:block;width:100%;margin-top:7px;padding:11px;border-radius:8px;border:1px solid #444;background:#111;color:white"><p class="note">Mantenha este dashboard na mesma pasta de index.html, script.js e style.css.</p></section>
+<footer>Dashboard de execução funcional • Plano de Teste da Calculadora</footer>
+</main>
+<script>
+const $=id=>document.getElementById(id), wait=ms=>new Promise(r=>setTimeout(r,ms));
+let stopped=false,running=false,results=[],frame=$("calcFrame");
+const cases=[
+{g:"CT01",id:"1.1",name:"Adição de inteiros positivos",a:"5",b:"3",op:"soma",expected:"8",want:v=>num(v,8)},
+{g:"CT01",id:"1.2",name:"Subtração resultando em positivo",a:"10",b:"4",op:"subtracao",expected:"6",want:v=>num(v,6)},
+{g:"CT01",id:"1.3",name:"Multiplicação simples",a:"6",b:"7",op:"multiplicacao",expected:"42",want:v=>num(v,42)},
+{g:"CT01",id:"1.4",name:"Divisão exata",a:"20",b:"4",op:"divisao",expected:"5",want:v=>num(v,5)},
+{g:"CT02",id:"2.1",name:"Operações com números decimais",a:"5.5",b:"2.15",op:"soma",expected:"7.65",want:v=>num(v,7.65)},
+{g:"CT02",id:"2.2",name:"Uso de números negativos",a:"-8",b:"2",op:"multiplicacao",expected:"-16",want:v=>num(v,-16)},
+{g:"CT02",id:"2.3",name:"Subtração gerando resultado negativo",a:"3",b:"10",op:"subtracao",expected:"-7",want:v=>num(v,-7)},
+{g:"CT02",id:"2.4",name:"Divisão com dízima periódica",a:"10",b:"3",op:"divisao",expected:"3.33333333 (aprox.)",want:v=>num(v,10/3,1e-7)},
+{g:"CT03",id:"3.1",name:"Divisão por zero",a:"15",b:"0",op:"divisao",expected:"Mensagem de erro / indefinido",want:v=>/zero|indefinido/i.test(v)},
+{g:"CT03",id:"3.2",name:"Entrada de texto / caractere inválido",expected:"Campo numérico bloqueia letras ou alerta",special:"invalid"},
+{g:"CT03",id:"3.3",name:"Campo obrigatório em branco",a:"",b:"4",op:"multiplicacao",expected:"Solicita preenchimento do campo",want:v=>/digite|preencha/i.test(v)},
+{g:"CT04",id:"UI.1",name:"Botão Limpar reseta todos os campos",expected:"Dois números, operação e resultado vazios",special:"clear"},
+{g:"CT04",id:"UI.2",name:"Resultado atualiza ao clicar em Calcular",a:"9",b:"3",op:"soma",expected:"Resultado 12 após clique",special:"click"},
+{g:"CT04",id:"UI.3",name:"Responsividade desktop e celular",expected:"Layout visível sem overflow horizontal",special:"responsive"}
+];
+function num(v,n,t=1e-8){return v!==""&&Number.isFinite(Number(v))&&Math.abs(Number(v)-n)<=t}
+function setStep(id,title,desc,fields=[]){$("stepId").textContent=id;$("stepTitle").textContent=title;$("stepDesc").textContent=desc;$("live").innerHTML="";fields.forEach(([k,v])=>{let d=document.createElement("div"),a=document.createElement("span"),b=document.createElement("b");a.textContent=k;b.textContent=v;d.append(a,b);$("live").append(d)})}
+function addLog(title,detail,status="pending"){let d=document.createElement("div");d.className="logitem";let p=document.createElement("span");p.className="pill "+status;p.textContent=status==="ok"?"APROVADO":status==="bad"?"REPROVADO":status==="warn"?"ATENÇÃO":"EM ANDAMENTO";let s=document.createElement("strong");s.textContent=title;s.append(p);let sm=document.createElement("small");sm.textContent=detail;d.append(s,sm);$("log").prepend(d)}
+function updateStats(){let p=results.filter(x=>x.status==="APROVADO").length,f=results.filter(x=>x.status==="REPROVADO").length,n=results.length; $("total").textContent=n+" / "+cases.length;$("passed").textContent=p;$("failed").textContent=f;$("rate").textContent=n?Math.round(p/n*100)+"%":"—";$("bar").style.width=(n/cases.length*100)+"%";$("percent").textContent=Math.round(n/cases.length*100)+"%";$("progressLabel").textContent=n===cases.length?"Execução concluída": "Executando caso "+(n+1)+" de "+cases.length}
+function reportOne(t,status,obtained){let x={...t,status,obtained};results.push(x);let tr=document.createElement("tr");[t.id,t.name,t.expected,obtained].forEach(v=>{let td=document.createElement("td");td.textContent=v;tr.append(td)});let td=document.createElement("td"),sp=document.createElement("span");sp.className="pill "+(status==="APROVADO"?"ok":"bad");sp.textContent=status;td.append(sp);tr.append(td);$("report").append(tr);updateStats();return x}
+function input(el,value){el.focus();el.value=value;el.dispatchEvent(new Event("input",{bubbles:true}));el.dispatchEvent(new Event("change",{bubbles:true}))}
+async function runCase(t,index,w,d){
+ if(stopped)return;
+ addLog(t.id+" — "+t.name,"Iniciando cenário "+(index+1)+" de "+cases.length+".");
+ setStep(t.id+" • "+t.g,t.name,"Preparando a calculadora para simular as ações do usuário.");
+ await wait(450);
+ let ok=false,obtained="";
+ try{
+  if(t.special==="invalid"){
+   let a=d.getElementById("numero1");setStep(t.id+" • CT03","Passo 1 — Digitar letras no campo numérico","O usuário tenta inserir “abc” no primeiro campo.",[["Campo","Primeiro número"],["Entrada tentada","abc"]]);input(a,"abc");await wait(550);
+   ok=a.type==="number"&&a.value==="";obtained=ok?"O navegador bloqueou a entrada de letras no campo numérico.":"O campo aceitou texto ou não está configurado como type=number.";
+  }else if(t.special==="clear"){
+   const clear=[...d.querySelectorAll("button")].find(b=>/limpar/i.test(b.textContent));
+   setStep(t.id+" • CT04","Passo 1 — Procurar botão Limpar","O usuário verifica se existe um botão para limpar todos os campos.");
+   if(!clear){ok=false;obtained='Botão “Limpar” não encontrado na interface.'}
+   else{input(d.getElementById("numero1"),"12");input(d.getElementById("numero2"),"3");d.getElementById("operacao").value="soma";d.getElementById("resultado").value="15";await wait(400);setStep(t.id,"Passo 2 — Clicar em Limpar","O usuário preenche os campos e clica no botão Limpar.");clear.click();await wait(450);ok=["numero1","numero2","operacao","resultado"].every(id=>d.getElementById(id).value==="");obtained=ok?"Todos os campos foram limpos.":"Um ou mais campos não foram limpos."}
+  }else if(t.special==="click"){
+   setStep(t.id,"Passo 1 — Preencher os números","O usuário digita 9 no primeiro campo e 3 no segundo.",[["Número 1","9"],["Número 2","3"]]);input(d.getElementById("numero1"),"9");await wait(300);input(d.getElementById("numero2"),"3");await wait(300);
+   setStep(t.id,"Passo 2 — Escolher a operação","O usuário seleciona Soma (+).",[["Operação","Soma (+)"]]);d.getElementById("operacao").value="soma";d.getElementById("operacao").dispatchEvent(new Event("change",{bubbles:true}));await wait(400);
+   setStep(t.id,"Passo 3 — Clicar em Calcular","O usuário pressiona o botão Calcular e observa o resultado.");let btn=[...d.querySelectorAll("button")].find(b=>/calcular/i.test(b.textContent));if(btn){btn.click();await wait(500);obtained=d.getElementById("resultado").value;ok=num(obtained,12);obtained="Resultado exibido após clique: "+obtained}else obtained="Botão Calcular não encontrado.";
+  }else if(t.special==="responsive"){
+   setStep(t.id,"Passo 1 — Visualização desktop","O teste verifica o layout em uma largura de 1200px.");$("iframeBox").style.width="100%";await wait(500);let box=d.querySelector(".calculadora"),m1={scroll:d.documentElement.scrollWidth,inner:w.innerWidth,box:box?.getBoundingClientRect().width||0};
+   setStep(t.id,"Passo 2 — Visualização celular","O teste reduz a área simulando tela de celular.");$("iframeBox").style.width="300px";await wait(650);let m2={scroll:d.documentElement.scrollWidth,inner:w.innerWidth,box:box?.getBoundingClientRect().width||0};ok=[m1,m2].every(m=>m.box>0&&m.box<=m.inner+1&&m.scroll<=m.inner+1);obtained="Desktop: "+(m1.scroll<=m1.inner+1?"sem overflow":"com overflow")+"; celular: "+(m2.scroll<=m2.inner+1?"sem overflow":"com overflow");$("iframeBox").style.width="100%";
+  }else{
+   setStep(t.id+" • "+t.g,"Passo 1 — Digitar o primeiro número","O usuário informa o primeiro valor no campo da calculadora.",[["Número 1",t.a===""?"(vazio)":t.a]]);input(d.getElementById("numero1"),t.a);await wait(350);
+   setStep(t.id+" • "+t.g,"Passo 2 — Digitar o segundo número","O usuário informa o segundo valor no campo da calculadora.",[["Número 2",t.b]]);input(d.getElementById("numero2"),t.b);await wait(350);
+   setStep(t.id+" • "+t.g,"Passo 3 — Selecionar operação","O usuário escolhe a operação matemática.",[["Operação",t.op]]);let sel=d.getElementById("operacao");sel.value=t.op;sel.dispatchEvent(new Event("change",{bubbles:true}));await wait(350);
+   setStep(t.id+" • "+t.g,"Passo 4 — Clicar em Calcular","O usuário pressiona Calcular e o dashboard lê o campo de resultado.");let btn=[...d.querySelectorAll("button")].find(b=>/calcular/i.test(b.textContent));if(btn){btn.click();await wait(450);obtained=d.getElementById("resultado").value;ok=t.want(obtained)}else obtained="Botão Calcular não encontrado.";
+  }
+ }catch(e){obtained="Erro na simulação: "+e.message;ok=false}
+ const status=ok?"APROVADO":"REPROVADO";reportOne(t,status,obtained);addLog(t.id+" — "+t.name,obtained,status==="APROVADO"?"ok":"bad");setStep(t.id+" • "+status,t.name,ok?"Validação concluída: o comportamento correspondeu ao esperado.":"Validação concluída: o resultado não correspondeu ao esperado.",[["Esperado",t.expected],["Obtido",obtained],["Status",status]]);await wait(550);
+}
+async function startRun(){
+ if(running)return;running=true;stopped=false;results=[];$("start").disabled=true;$("stop").disabled=false;$("log").innerHTML="";$("report").innerHTML="";$("finalNote").textContent="Execução em andamento. Acompanhe as ações e os resultados acima.";
+ try{
+  setStep("INICIALIZAÇÃO","Abrindo a calculadora","Carregando a página indicada e verificando se os campos e a função calcular() existem.");
+  await new Promise((resolve,reject)=>{let done=false;let timer=setTimeout(()=>finish(reject,new Error("Tempo esgotado. Confira o caminho do HTML.")),10000);function finish(fn,v){if(!done){done=true;clearTimeout(timer);fn(v)}}frame.onload=()=>{
+    try {
+      let doc = frame.contentDocument;
+      let style = doc.createElement('style');
+      style.innerHTML = `
+        html, body { overflow: hidden !important; margin: 0 !important; padding: 10px !important; min-height: auto !important; background: transparent !important; }
+        .calculadora { margin: 0 auto !important; padding: 22px 20px 18px !important; max-width: 100% !important; border-radius: 14px !important; box-shadow: none !important; }
+        h1 { margin-bottom: 12px !important; font-size: 28px !important; }
+        .descricao { margin-bottom: 16px !important; font-size: 13px !important; line-height: 1.45 !important; }
+        label { margin-top: 10px !important; margin-bottom: 4px !important; font-size: 14px !important; }
+        input, select { padding: 9px 12px !important; font-size: 14px !important; }
+        button { padding: 11px !important; margin-top: 16px !important; font-size: 15px !important; }
+      `;
+      doc.head.appendChild(style);
+    } catch(e){}
+    finish(resolve);
+  };frame.onerror=()=>finish(reject,new Error("Não foi possível carregar a calculadora."));let p=$("path").value.trim()||"index.html";frame.src=p+(p.includes("?")?"&":"?")+"autoQA="+Date.now()});
+  let w=frame.contentWindow,d=frame.contentDocument;if(!d.getElementById("numero1")||!d.getElementById("numero2")||!d.getElementById("operacao")||!d.getElementById("resultado")||typeof w.calcular!=="function")throw new Error("Não foram encontrados todos os campos ou a função calcular(). Verifique os arquivos da calculadora.");
+  addLog("Calculadora carregada","Campos número 1, número 2, operação, resultado e função calcular() encontrados.","ok");
+  for(let i=0;i<cases.length;i++){if(stopped)break;await runCase(cases[i],i,w,d)}
+  if(stopped){setStep("EXECUÇÃO PAUSADA","Teste interrompido","A execução foi interrompida pelo usuário.");$("finalNote").textContent="Execução interrompida manualmente."}
+  else{let p=results.filter(x=>x.status==="APROVADO").length,f=results.length-p;setStep("FIM DA EXECUÇÃO","Todos os casos foram percorridos","A simulação terminou. Consulte o relatório para ver os aprovados e reprovados.",[["Casos executados",results.length],["Aprovados",p],["Reprovados",f]]);$("finalNote").textContent="Execução concluída: "+p+" aprovados e "+f+" reprovados. CT03.4 não foi executado."}
+ }catch(e){setStep("ERRO DE CONFIGURAÇÃO","Não foi possível iniciar",e.message);addLog("Falha ao carregar calculadora",e.message,"bad");$("finalNote").textContent=e.message}
+ finally{running=false;$("start").disabled=false;$("stop").disabled=true}
+}
+function stopRun(){stopped=true;$("stop").disabled=true}
+</script></body></html>
