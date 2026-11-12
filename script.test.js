@@ -47,6 +47,12 @@ describe("calculadora", () => {
         expect(calcular({ numero1: "81", operacao: "raiz" })).toBe("9");
     });
 
+    test("exige a seleção de uma operação", () => {
+        expect(calcular({ numero1: "5" })).toBe(
+            "Cálculo inválido, selecione uma opção!"
+        );
+    });
+
     test("informa quando o primeiro número não foi preenchido", () => {
         expect(calcular({ numero2: "3", operacao: "soma" })).toBe(
             "Digite o primeiro número!"

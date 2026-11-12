@@ -148,7 +148,6 @@ button:active {
 
 /* Responsividade para celulares */
 @media (max-width: 480px) {
-
     .calculadora {
         padding: 25px 20px;
     }
@@ -156,5 +155,4 @@ button:active {
     h1 {
         font-size: 28px;
     }
-
 }
